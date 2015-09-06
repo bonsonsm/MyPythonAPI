@@ -1,0 +1,64 @@
+from nltk.stem import PorterStemmer
+from nltk.stem import LancasterStemmer
+from nltk.stem import RegexpStemmer
+from nltk.stem import SnowballStemmer
+from nltk.stem import WordNetLemmatizer
+
+def stemWordPorter(strWord):
+    stemmer = PorterStemmer()
+    return(stemmer.stem(strWord))
+
+'''
+This is slightly more agressive than the PorterStemmer
+'''
+def stemWordLancaster(strWord):
+    stemmer = LancasterStemmer()
+    return(stemmer.stem(strWord))
+
+'''
+The RegEx Stemmer should be used only in specific situations
+where the PorterStemmer and the LancasterStemmer do not work.
+'''
+def stemWordRegEx(strWord):
+    stemmer = RegexpStemmer('ing')
+    return(stemmer.stem(strWord))
+
+'''
+The Snoball stemmer supports 11 languages + porterStemmer + one more in Engish
+'''
+def stemWordSnowball(strLanguage, strWord):
+    stemmer = SnowballStemmer(strLanguage)
+    return(stemmer.stem(strWord))
+'''
+Get the lemma of the word and the POS of the word as well.
+'''
+def lemmaWordNet(strWord, strPOS):
+    lemmatizer = WordNetLemmatizer()
+    return(lemmatizer.lemmatize(strWord,pos=strPOS))
+
+if __name__ == "__main__":
+    print("Porter Stemmer")
+    result = stemWordPorter("Cooking")
+    print(result)
+    result = stemWordPorter("Cookery")
+    print(result)
+
+    print("Lancaster Stemmer")
+    result = stemWordLancaster("Cooking")
+    print(result)
+    result = stemWordLancaster("Cookery")
+    print(result)
+
+    print("RegEx Stemmer")
+    result = stemWordRegEx("Cooking")
+    print(result)
+    result = stemWordRegEx("Cookery")
+    print(result)
+
+    print("Snowball Stemmer")
+    result = stemWordSnowball("spanish", "hola")
+    print(result)
+
+    print("Lemmatization")
+    result = lemmaWordNet("cooking","v")
+    print(result)    
