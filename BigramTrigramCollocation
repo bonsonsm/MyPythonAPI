@@ -1,0 +1,54 @@
+from nltk.corpus import webtext
+from nltk.collocations import BigramCollocationFinder
+from nltk.metrics import BigramAssocMeasures
+from nltk.corpus import stopwords
+from nltk.collocations import TrigramCollocationFinder
+from nltk.metrics import TrigramAssocMeasures
+
+'''
+intFrequencyFilter: Number of times the bigram should have appear in the text
+intResultCount: maximum intResultCount number of records should be given out
+objWords: the word list from which the text is to be extracted
+strStopwords: the strStopwords corpus to be used
+'''
+def getBigrams(intFrequencyFilter, intResultCount, objWords, strStopwords):
+    #words = [w.lower() for w in webtext.words('grail.txt')]
+    bcf = BigramCollocationFinder.from_words(objWords)
+    stopset = set(stopwords.words(strStopwords))
+    #remove punctuation or stop words
+    filter_stops = lambda w: len(w) < 3 or w in stopset
+    bcf.apply_word_filter(filter_stops)
+    #Get words that have a minimum frequency as specified in the filter
+    bcf.apply_freq_filter(intFrequencyFilter)
+    result = bcf.nbest(BigramAssocMeasures.likelihood_ratio, intResultCount)
+    return result
+
+'''
+intFrequencyFilter: Number of times the trigram should have appear in the text
+intResultCount: maximum intResultCount number of records should be given out
+objWords: the word list from which the text is to be extracted
+strStopwords: the stopwords corpus to be used
+'''
+def getTrigrams(intFrequencyFilter, intResultCount, objWords, strStopwords):
+    #words = [w.lower() for w in webtext.words('singles.txt')]
+    tcf = TrigramCollocationFinder.from_words(objWords)
+    stopset = set(stopwords.words(strStopwords))
+    #remove punctuation or stop words
+    filter_stops = lambda w: len(w) < 3 or w in stopset
+    tcf.apply_word_filter(filter_stops)
+    #Get words that have a minimum frequency as specified in the filter
+    tcf.apply_freq_filter(intFrequencyFilter)
+    result = tcf.nbest(TrigramAssocMeasures.likelihood_ratio, intResultCount)
+    return result
+
+if __name__ == "__main__":
+    
+    print("Getting BiGrams")
+    objWords =  [w.lower() for w in webtext.words('grail.txt')]
+    result = getBigrams(4,500, objWords, "english")
+    print(result)
+    
+    print("Getting Tri Grams")
+    objWords = [w.lower() for w in webtext.words('singles.txt')]
+    result = getTrigrams(2,200, objWords, "english")
+    print(result)
