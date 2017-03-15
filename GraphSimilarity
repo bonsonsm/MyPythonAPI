@@ -19,30 +19,39 @@ class GraphSimilarity:
     
     def createGraph(self, df_data):
         sentence = ""
+        sentence_count=0
+        i=0
+        DG=nx.DiGraph()
         for index, row in df_data.iterrows():
             sentence = row[1]
-            break
-        tokens = nltk.word_tokenize(sentence)
-        print(tokens)
-        DG=nx.DiGraph()
-        for i in range(len(tokens)):
+            print(sentence)
+            sentence_count=sentence_count + 1
             
-            print("******",i)
-            #print(tokens[i])
-            if i == 0:
-                continue
-            DG.add_edges_from([(tokens[i-1], tokens[i])], weight=1)
-            #DG.add_edge(tokens[i-1], tokens[i])
-            #DG.add_edges_from([('A', 'B'),('C','D'),('G','D')], weight=1)
-            
-            print(DG.nodes())
-            #if i ==3:
-            #    break
+            if sentence_count >= 2:
+                break
+            else:
+                tokens = nltk.word_tokenize(sentence)
+                for i in range(len(tokens)):
+                    if i == 0:
+                        continue
+                    DG.add_edges_from([(tokens[i-1], tokens[i])], weight=1)
+
         print(list(DG.nodes()))
         print(list(DG.edges()))
-        self.drawGraph(DG)
+        return DG
         
+    def getContainmentSimilarity(self, sub_graph,main_graph):
+        print("In Get Containment Similarity")
         
+    def getMCSNodeSimilarity(self, sub_graph,main_graph):
+        print("In Get MCS Node Similarity")
+    
+    def getMCSEdgeSimilarity(self, sub_graph,main_graph):
+        print("In Get MCS Edge  Similarity")
+    
+    def getMCSEdgeDirectionSimilarity(self, sub_graph,main_graph):
+        print("In Get MCS Edge Direction Similarity")
+    
     def drawGraph(self, DG):
         node_labels = {node:node for node in DG.nodes()}
         
@@ -65,7 +74,20 @@ class GraphSimilarity:
     def run1(self, full_path, sheet_name, header):
         print("### Run 1 ### - Start")
         df_data = self.preprocessing(full_path, sheet_name, header)
-        self.createGraph(df_data)
+        main_graph = self.createGraph(df_data)
+        self.drawGraph(main_graph)
+        
+        #raw_data = {'id': ['1','2','3'], 'sentence':['How are you today?', 'Wish you a Happy Birthday.', 'Will meet you tomorrow.'], 'sentiment': [0, 4, 3]}
+        raw_data = {'id': ['1'], 'sentence':['How are you today?'], 'sentiment': [0]}
+        df_subgraph_data = pd.DataFrame(raw_data, columns = ['id', 'sentence', 'sentiment'])
+        sub_graph = self.createGraph(df_subgraph_data)
+        self.drawGraph(sub_graph)
+        
+        self.getContainmentSimilarity(sub_graph,main_graph)
+        self.getMCSNodeSimilarity(sub_graph,main_graph)
+        self.getMCSEdgeSimilarity(sub_graph,main_graph)
+        self.getMCSEdgeDirectionSimilarity(sub_graph,main_graph)
+        
         print("### Run 1 ### - End")
 
 
