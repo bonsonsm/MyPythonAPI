@@ -18,44 +18,40 @@ class GraphSimilarity:
         return pd_preprocess_df
     
     def createGraph(self, df_data):
+        SENTENCES_CONSIDERED=3
         sentence = ""
-        sentence_count=0
+        sentence_count=1
         i=0
+        avg_tokens_per_sentence = 0
         DG=nx.DiGraph()
         for index, row in df_data.iterrows():
             sentence = row[1]
-            print(sentence)
-            sentence_count=sentence_count + 1
-            
-            if sentence_count >= 2:
+            if sentence_count > SENTENCES_CONSIDERED:
+                sentence_count = sentence_count -1
                 break
             else:
+                print(sentence)
                 tokens = nltk.word_tokenize(sentence)
-                for i in range(len(tokens)):
+                token_count = len(tokens)
+                print(avg_tokens_per_sentence)
+                print(token_count)
+                avg_tokens_per_sentence = ((avg_tokens_per_sentence * (sentence_count - 1)) + token_count) / sentence_count
+                print(avg_tokens_per_sentence)
+                for i in range(token_count):
                     if i == 0:
                         continue
                     DG.add_edges_from([(tokens[i-1], tokens[i])], weight=1)
-
-        print(list(DG.nodes()))
+            sentence_count=sentence_count + 1
+            
+        print("Total Sentence Count",sentence_count)
+        print("avg_tokens_per_sentence",avg_tokens_per_sentence)
+        #print(list(DG.nodes()))
         print(list(DG.edges()))
-        return DG
-        
-    def getContainmentSimilarity(self, sub_graph,main_graph):
-        print("In Get Containment Similarity")
-        
-    def getMCSNodeSimilarity(self, sub_graph,main_graph):
-        print("In Get MCS Node Similarity")
-    
-    def getMCSEdgeSimilarity(self, sub_graph,main_graph):
-        print("In Get MCS Edge  Similarity")
-    
-    def getMCSEdgeDirectionSimilarity(self, sub_graph,main_graph):
-        print("In Get MCS Edge Direction Similarity")
+        return DG, avg_tokens_per_sentence
     
     def drawGraph(self, DG):
+        print("### In DrawGraph")
         node_labels = {node:node for node in DG.nodes()}
-        
-        
         val_map = {'FIRST': 1.0,'NORMAL': 0.5714285714285714,'LAST': 0.0}
         values = [val_map.get(node, 1.0) for node in DG.nodes()]
                   
@@ -70,20 +66,66 @@ class GraphSimilarity:
         pylab.show()
                               
         nx.draw(DG)
+        
+    def getContainmentSimilarity(self, sub_graph,main_graph, means_edges_per_doc_in_main_graph):
+        print("### In getContainmentSimilarity")
+        edges_main_graph = len(main_graph.edges())
+        print("Total Edges", edges_main_graph)
+        edges_sub_graph = len(sub_graph.edges())
+        print("Total Edges sub_graph", edges_sub_graph)        
+        denominator=0
+        DIF=nx.create_empty_copy(main_graph)
+        print("In Get Containment Similarity")
+        matching_edges=0
+        for edge in sub_graph.edges_iter():
+            print(edge)
+            if main_graph.has_edge(edge[0],edge[1]):
+                print("In if")
+                DIF.add_edge(edge[0],edge[1])
+                matching_edges = matching_edges +1
+            else:
+                print("In Else")
+        print("DIF",DIF)
+        print("matching_edges",matching_edges)
+
+        if edges_main_graph <  edges_sub_graph:
+            denominator = edges_main_graph
+        else:
+            denominator = edges_sub_graph
+        
+        numerator = matching_edges * means_edges_per_doc_in_main_graph
+        print("numerator",numerator)
+        print("denominator",denominator)
+        print("matching_edges",matching_edges)
+        print("means_edges_per_doc_in_main_graph",means_edges_per_doc_in_main_graph)
+        return_value = numerator/denominator
+        print("return_value",return_value)
+        return return_value;
+        
+    def getMCSNodeSimilarity(self, sub_graph,main_graph):
+        print("### In Get MCS Node Similarity")
+    
+    def getMCSEdgeSimilarity(self, sub_graph,main_graph):
+        print("### In Get MCS Edge  Similarity")
+    
+    def getMCSEdgeDirectionSimilarity(self, sub_graph,main_graph):
+        print("### In Get MCS Edge Direction Similarity")
+    
+  
     
     def run1(self, full_path, sheet_name, header):
         print("### Run 1 ### - Start")
         df_data = self.preprocessing(full_path, sheet_name, header)
-        main_graph = self.createGraph(df_data)
+        main_graph, avg_tokens_per_sentence_main = self.createGraph(df_data)
         self.drawGraph(main_graph)
         
         #raw_data = {'id': ['1','2','3'], 'sentence':['How are you today?', 'Wish you a Happy Birthday.', 'Will meet you tomorrow.'], 'sentiment': [0, 4, 3]}
-        raw_data = {'id': ['1'], 'sentence':['How are you today?'], 'sentiment': [0]}
+        raw_data = {'id': ['1'], 'sentence':['A series of escapades'], 'sentiment': [0]}
         df_subgraph_data = pd.DataFrame(raw_data, columns = ['id', 'sentence', 'sentiment'])
-        sub_graph = self.createGraph(df_subgraph_data)
+        sub_graph, avg_tokens_per_sentence = self.createGraph(df_subgraph_data)
         self.drawGraph(sub_graph)
         
-        self.getContainmentSimilarity(sub_graph,main_graph)
+        self.getContainmentSimilarity(sub_graph,main_graph,avg_tokens_per_sentence_main)
         self.getMCSNodeSimilarity(sub_graph,main_graph)
         self.getMCSEdgeSimilarity(sub_graph,main_graph)
         self.getMCSEdgeDirectionSimilarity(sub_graph,main_graph)
