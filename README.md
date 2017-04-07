@@ -11,3 +11,5 @@ Books on Graph Theory
 https://www.youtube.com/watch?v=BuMu-bdoVrU
 
 http://chdoig.github.io/pytexas2015-topic-modeling/#/6/1
+
+http://nbviewer.jupyter.org/github/bmabey/pyLDAvis/blob/master/notebooks/pyLDAvis_overview.ipynb
